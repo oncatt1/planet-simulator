@@ -31,9 +31,6 @@ double Vector2d::Magnitude() const { return std::sqrt(x * x + y * y); }
 
 double Vector2d::MagnitudeSquared() const { return x * x + y * y; }
 
-Vector2d Vector2d::Normalized() const { double mag = Magnitude(); return (mag == 0) ? Vector2d(0, 0) : Vector2d(x / mag, y / mag); }
-
-
 Planet::Planet() : position(0, 0), velocity(0, 0), acceleration(0, 0), radius(0), mass(0), distance_scale(0), radius_scale(0), color_r(0), color_g(0), color_b(0), tag(""), eccentricity(0), orbital_period(0), gravity(0) {}
 
 
@@ -98,8 +95,8 @@ static Vector2d GravitationalForce(Planet main, Planet other)
 	if (direction.Magnitude() == 0) return { 0, 0 };
     double distance = direction.Magnitude();
     double forceMagnitude = (G * main.mass * other.mass) / (distance * distance);
-
-    return direction.Normalized() * forceMagnitude;
+    Vector2d normalized = { direction.x / distance, direction.y / distance };
+    return normalized * forceMagnitude;
 }
 
 static void ApplyGravitationalForce(Planet* planets, unsigned short planetCount, double dt) // multi body problem
@@ -113,11 +110,12 @@ static void ApplyGravitationalForce(Planet* planets, unsigned short planetCount,
 
         planets[i].acceleration = netForce / planets[i].mass;
         planets[i].velocity = planets[i].velocity + planets[i].acceleration * dt;
-        planets[i].position = planets[i].position + planets[i].velocity * dt; // dodac mozna symmetry of force 
+        planets[i].position = planets[i].position + planets[i].velocity * dt;
     }
 }
 
-CelestialSystem::CelestialSystem(Planet* planets, unsigned short num_planets, bool planet_system) : planets(planets), num_planets(num_planets), planet_system(planet_system)
+CelestialSystem::CelestialSystem(Planet* planets, unsigned short num_planets, bool planet_system)
+    : planets(planets), num_planets(num_planets), planet_system(planet_system)
 {
     if (planets[0].position.x != 0) {
         planets[0].radius *= 5;

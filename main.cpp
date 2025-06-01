@@ -27,17 +27,23 @@ float fpsTimer = 0.0f;
 unsigned short fps = 1;
 float time_accumulator = 0.0f;
 
+//// i know i could delete those static_casts as you said on the lesson but im too lazy to do so, i am not touching this project anymore
+//// things could be done better but i did it my way
+//// change up the simulation variables to your pc's liking
+//// have fun
+
 //Simulation Variables
 const unsigned short screen_type = 0;           // changes the resolution of the screen  0 - 3840 2160 , 1 - 1920 1080, 2 - 1366 768, 3 - 1680 1050
 const bool fullscreen = true;                   // if true makes the fullscreen
 const bool shit_computer = false;                // disables the creating of asteroids and enables making breaks in simulating bodies based on simulation_time_delay
-const float simulation_time_delay = 0;          // value of this variable delays the simulation by an amount of frames (max 60)
+const float simulation_time_delay = 0;          // value of this variable delays the simulation by an amount of frames (max 60) for bad pcs
 const int max_fps = 60;                         // sets the max amount of fps
 
 int WIDTH = static_cast<int>(screen_type_resolution[screen_type][0]);
 int HEIGHT = static_cast<int>(screen_type_resolution[screen_type][1]);
 sf::Vector2f pos = { static_cast<float>(-WIDTH / 2), static_cast<float>((HEIGHT / 10) * 4) };  // a helping vector for drawing the ui
 
+//Drawing text with a large double value
 template <typename T>
 static void DrawText(sf::Text text, std::string word, T value, std::string word2, bool scientific) {
     if (scientific) {
@@ -51,10 +57,14 @@ static void DrawText(sf::Text text, std::string word, T value, std::string word2
     }
     window.draw(text);
 }
+
+//Drawing text with a int value
 static void DrawText(sf::Text text, std::string word, std::string value) {
     text.setString(word + value);
     window.draw(text);
 }
+
+//Drawing text with a int value and a text after it
 static void DrawText(sf::Text text, std::string word, Vector2d value, std::string word2) {
     std::ostringstream val_x;
     val_x << std::scientific << std::setprecision(6) << value.x; 
@@ -63,6 +73,8 @@ static void DrawText(sf::Text text, std::string word, Vector2d value, std::strin
     text.setString(word + val_x.str() + ", " + val_y.str() + word2);
     window.draw(text);
 }
+
+//Setting text with a position, size and color  
 static sf::Text SetText(Vector2d pos, unsigned short size, sf::Color color) {
     sf::Text text(font);
     text.setString("");
@@ -71,6 +83,8 @@ static sf::Text SetText(Vector2d pos, unsigned short size, sf::Color color) {
     text.setPosition(sf::Vector2f(static_cast<float>(pos.x), static_cast<float>(pos.y)));
     return text;
 }
+
+//Scaling the value by the display resolution
 static double ScaleByDisplay(double scale) {
     if (screen_type == 1) 
         scale /= 2;
@@ -81,9 +95,8 @@ static double ScaleByDisplay(double scale) {
         scale /= 2.286;
     return scale;
 }
-static void OnMouseClick() {
-    std::cout << sf::Mouse::getPosition().x << ", " << sf::Mouse::getPosition().y << std::endl;
-}
+
+//Creating stars in the background
 static void CreateStars() {
 	for (int i = 0; i < 1000; ++i) {
         stars[i][0] = -screen_type_resolution[screen_type][0] / 2 + rand() % (screen_type_resolution[screen_type][0] / 2 + screen_type_resolution[screen_type][0] / 2 + 1);
@@ -91,6 +104,8 @@ static void CreateStars() {
         stars[i][2] = 0.3 + (1 - 0.3) * (rand() / ((double)RAND_MAX));
 	}
 }
+
+//Drawing stars in the background
 static void DrawStars() {
     for (int i = 0; i < 1000; ++i) {
         sf::CircleShape star(static_cast<float>(stars[i][2]));
@@ -100,6 +115,8 @@ static void DrawStars() {
         window.draw(star);
     }
 }
+
+//Creating the ui
 static void CreateUi() {
     int width = WIDTH;
     int height = HEIGHT / 10;
@@ -125,17 +142,23 @@ static void CreateUi() {
 
     
 }
+
+//Drawing ui
 static void DrawUi() {
     for (int i = 0; i < 6; ++i) {
         window.draw(ui_elements[i]);
     }
 }
+
+//Function to show some help text
 static void ShowHelp(sf::Text* texts) {
     DrawText(texts[15], "Press arrows to change body", ""); //arrows
     DrawText(texts[16], "Press numbers to change system", ""); //numbers
     DrawText(texts[17], "Press shift to change key repeat", ""); //shift
     DrawText(texts[18], "Press escape to exit", ""); //escape
 }
+
+
 int main()
 {
     if(fullscreen) window.create(sf::VideoMode({ static_cast<unsigned int>(screen_type_resolution[screen_type][0]), static_cast<unsigned int>(screen_type_resolution[screen_type][0]) }), "planeciory", sf::State::Fullscreen);
@@ -159,6 +182,7 @@ int main()
     const int uranusSystemCount = 11;
     const int neptuneSystemCount = 11;
 
+    //the solar planets are a dynamic array due the fact that i was going to add a "in game" adding celestial bodies feature
     Planet* solarPlanets = new Planet[solarSystemCount]{
         Planet(Vector2d(0, 0), 6.963e8, 1.989e30, 0.0, 255, 255, 0, 1, ScaleByDisplay(8e3), "sun"),                                 // sun
         Planet(Vector2d(5.791e10, 0), 2.4397e6, 3.3022e23, 0.2056, 255, 255, 50, ScaleByDisplay(1.3e2), ScaleByDisplay(1e5), "mercury"),   // mercury
@@ -247,17 +271,10 @@ int main()
 
     //add here new solar system planets, elsewere will break the asteroid spawn if shit_computer is false
     
-    solarSystem.AddPlanet(Planet(Vector2d(5e11, 0), 6.371e6, 5.972e24, 0.5, 0, 102, 204, ScaleByDisplay(1.3e2), ScaleByDisplay(2e5), "murzyn1"));
-    solarSystem.AddPlanet(Planet(Vector2d(1.496e11, 0), 6.371e6, 5.972e30, 0.5, 0, 102, 204, ScaleByDisplay(1.3e2), ScaleByDisplay(2e5), "murzyn2"));
-    solarSystem.AddPlanet(Planet(Vector2d(12e11, 0), 6.371e6, 5.972e30, 0.5, 0, 102, 204, ScaleByDisplay(1.3e2), ScaleByDisplay(2e5), "murzyn3"));
-    solarSystem.AddPlanet(Planet(Vector2d(1e11, 0), 6.371e6, 5.972e30, 0.5, 0, 102, 204, ScaleByDisplay(1.3e2), ScaleByDisplay(2e5), "murzyn4"));
-    solarSystem.AddPlanet(Planet(Vector2d(2e11, 0), 6.371e6, 5.972e30, 0.5, 0, 102, 204, ScaleByDisplay(1.3e2), ScaleByDisplay(2e5), "murzyn5"));
-    solarSystem.AddPlanet(Planet(Vector2d(18e11, 0), 6.371e6, 5.972e30, 0.5, 0, 102, 204, ScaleByDisplay(1.3e2), ScaleByDisplay(2e5), "murzyn6"));
-    solarSystem.AddPlanet(Planet(Vector2d(15e11, 0), 6.371e6, 5.972e30, 0.5, 0, 102, 204, ScaleByDisplay(1.3e2), ScaleByDisplay(2e5), "murzyn7"));
-    solarSystem.AddPlanet(Planet(Vector2d(16e11, 0), 6.371e6, 5.972e30, 0.5, 0, 102, 204, ScaleByDisplay(1.3e2), ScaleByDisplay(2e5), "murzyn8"));
-    solarSystem.AddPlanet(Planet(Vector2d(9e11, 0), 6.371e6, 5.972e30, 0.5, 0, 102, 204, ScaleByDisplay(1.3e2), ScaleByDisplay(2e5), "murzyn9"));
-    
+    ///solarSystem.AddPlanet(Planet(Vector2d(5e11, 0), 6.371e6, 5.972e24, 0.5, 0, 102, 204, ScaleByDisplay(1.3e2), ScaleByDisplay(2e5), "czarnadzioora"));
+    ///solarSystem.AddPlanet(Planet(Vector2d(1.496e11, 0), 6.371e6, 5.972e30, 0.5, 0, 102, 204, ScaleByDisplay(1.3e2), ScaleByDisplay(2e5), "czarnadzioora2"));
 
+    //the part where you can customize asteroid creation
     const int asteroidCount = 100;
     if (!shit_computer) { // creating the asteroids 
 
@@ -286,9 +303,7 @@ int main()
     CreateStars(); // creating the completely random stars
     CreateUi();
 
-    for (int i = 0; i < systems[0]->num_planets; i++) {
-        std::cout << i << " " << systems[0]->planets[i].tag << std::endl;
-    }
+	//an array storing the texts that will be drawn on the screen
     sf::Text texts[19] = {
                             SetText(Vector2d(-WIDTH / 2, -HEIGHT / 2), 23, sf::Color::White),       //dt
                             SetText(Vector2d(-WIDTH / 2, -HEIGHT / 2 + 20), 23, sf::Color::White),  //key repeat
@@ -317,14 +332,14 @@ int main()
 
                             
     };
+    
     while (window.isOpen())
     {
+        //controlls
         while (const std::optional<sf::Event> event = window.pollEvent())
         {
             if (event->is<sf::Event::Closed>())
                 window.close();
-            if (event->is<sf::Event::MouseButtonPressed>())
-                OnMouseClick();
             if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>())
             {
                 if (keyPressed->scancode == sf::Keyboard::Scancode::Escape) { window.close(); }
@@ -360,6 +375,7 @@ int main()
             }
         }
 
+        //fps clock
         float deltaTime = sim_clock.restart().asSeconds();
         fpsTimer += deltaTime;
         time_accumulator += deltaTime;
@@ -368,12 +384,13 @@ int main()
         window.setView(view);
         window.clear();
 
-        if (time_accumulator >= simulation_time_delay / max_fps && shit_computer) { // every x th of a frame simulating the systems
+        if (time_accumulator >= simulation_time_delay / max_fps && shit_computer) { // every x th of a frame simulating the systems for poor pcs
             time_accumulator = 0.0f;
             systems[system_number]->Simulate(dt);
         }
         else systems[system_number]->Simulate(dt);
 
+        //writing and calculating fps
         if (fpsTimer >= 1.0f) {
             fps = frameCount / fpsTimer;
             frameCount = 0;
@@ -382,6 +399,7 @@ int main()
             texts[2].setString("FPS: " + std::to_string(fps));
         }
 
+        //drawing
         DrawStars();
         systems[system_number]->Draw(window);
         DrawUi();
